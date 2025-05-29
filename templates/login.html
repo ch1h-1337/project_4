@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход или регистрация</title>
+    <style>
+        body { font-family: Arial; margin: 2em; }
+        form { max-width: 400px; margin-bottom: 2em; }
+        input, button { display: block; margin-bottom: 1em; width: 100%; padding: 0.5em; }
+        .message { margin-top: 1em; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Войти или зарегистрироваться</h1>
+
+    <h2>Вход</h2>
+    <form id="loginForm">
+        <input type="text" name="username" placeholder="Имя пользователя" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+    </form>
+
+    <h2>Регистрация</h2>
+    <form id="registerForm">
+        <input type="text" name="username" placeholder="Имя пользователя" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <div class="message" id="message"></div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const messageDiv = document.getElementById('message');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleAuth('/api/login', loginForm, 'Вход выполнен!');
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleAuth('/api/register', registerForm, 'Регистрация успешна!');
+        });
+
+        async function handleAuth(endpoint, form, successMsg) {
+            const formData = new FormData(form);
+            const payload = {
+                username: formData.get('username'),
+                password: formData.get('password')
+            };
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    messageDiv.textContent = successMsg;
+                    messageDiv.className = "message success";
+                    console.log("Ответ:", data);
+                    if (data.access_token) {
+                        localStorage.setItem("token", data.access_token);
+                    }
+                } else {
+                    messageDiv.textContent = data.error || "Ошибка";
+                    messageDiv.className = "message error";
+                }
+
+            } catch (err) {
+                messageDiv.textContent = "Успешно!";
+                messageDiv.className = "message error";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
