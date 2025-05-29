@@ -1,0 +1,7 @@
+от 4проекта на гитхабе
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(150) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL
+);
